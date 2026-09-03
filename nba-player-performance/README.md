@@ -1,110 +1,60 @@
-# Rookie Shot Selection Analysis
+# NBA Rookie Shot Selection Analysis
 
-## Cooper Flagg vs. Dylan Harper vs. Kon Knueppel
+## Executive summary
 
-This project analyzes and compares the shot-selection profiles of Cooper Flagg, Dylan Harper, and Kon Knueppel during the 2025-26 NBA regular season.
+This project compares the 2025–26 shot profiles of Cooper Flagg, Dylan Harper, and Kon Knueppel. The analysis converts play-by-play shot records into a consistent set of location and efficiency metrics, then uses those metrics to describe each player's offensive tendencies.
 
-Using shot-level data from NBA.com Stats, the analysis examines where each rookie attempted shots, how efficiently they scored from different areas of the court, and how their offensive styles differed.
+5. Calculate attempts, makes, field-goal percentage, shot share, and points per attempt.
+6. Compare player profiles visually and summarize decision-relevant takeaways.
 
-## Project Questions
+## Key findings
 
-- Where does each player take the majority of his shots?
-- How frequently does each player attack the rim, shoot from mid-range, or attempt three-pointers?
-- How efficient is each player from different areas of the court?
-- How do their average shot distances compare?
-- Which player generates the most points per field goal attempt?
+Replace the bracketed text below with exact values produced by the notebook. Keep this section to three or four evidence-backed bullets.
 
-## Tools Used
+- **Shot distribution:** Kon Knueppel had the most perimeter-oriented profile, with 59.2% of his attempts coming from three-point range and an average shot distance of 17.4 feet.
+- **Overall efficiency:** Dylan Harper recorded the highest field-goal percentage at 50.5%, despite having the smallest sample of the three players at 656 attempts.
+- **Profile difference:** Knueppel's three-point rate was 38.8 percentage points higher than Cooper Flagg's, while Harper's restricted-area rate was 18.0 percentage points higher than Flagg's.
+- **Development opportunity:** Flagg took 20.3% of his shots from mid-range—the highest rate in the group—while posting the lowest overall field-goal percentage at 46.8%. This makes his mid-range shot selection a useful area for additional film and efficiency analysis.
+## Recommendations
 
-- Python
-- pandas
-- Matplotlib
-- nba_api
-- Jupyter Notebook / VS Code
-- Git & GitHub
+- Use both volume and efficiency when evaluating a shot zone; high percentage on a very small sample should not drive a decision by itself.
+- Review film and lineup context for the largest differences. Shot data describes outcomes and locations, but not defensive pressure, play type, or teammate spacing.
+- Track the same metrics over multiple seasons or rolling intervals to determine whether early patterns remain stable.
+- Pair this work with possession, play-type, and lineup data before making personnel conclusions.
 
-## Data
+## Data quality checks
 
-Shot-level data was collected from NBA.com Stats using the `nba_api` Python package.
+The reproducible summary script checks for:
 
-The dataset includes:
-
-- Shot coordinates
-- Shot zones
-- Shot distance
-- Shot type
-- Makes and misses
-- Game dates
-
-The analysis covers the 2025-26 NBA regular season.
-
-## Key Findings
-
-### Cooper Flagg — Balanced Scoring Profile
-
-Flagg displayed the most balanced shot distribution of the three rookies.
-
-- 31.6% of attempts came from the non-restricted paint
-- 20.3% came from mid-range
-- 20.4% of attempts were three-pointers
-- Average shot distance: 11.0 feet
-- Points per field goal attempt: 0.997
-
-His shot profile shows significant usage in both the interior and intermediate areas of the court.
-
-### Dylan Harper — Rim-Oriented Attacker
-
-Harper had the strongest rim-oriented shot profile.
-
-- 45.6% of attempts came from the restricted area
-- Only 9.9% came from mid-range
-- Average shot distance: 10.2 feet
-- Points per field goal attempt: 1.102
-
-His shot distribution reflects an offensive style centered heavily around attacking the basket.
-
-### Kon Knueppel — Perimeter-Oriented Shooter
-
-Knueppel had the strongest perimeter-oriented profile.
-
-- 59.2% of attempts were three-pointers
-- 45.9% came from above-the-break three
-- Average shot distance: 17.4 feet
-- Points per field goal attempt: 1.202
-
-Knueppel generated the highest points per field goal attempt of the three players, demonstrating the value created by his combination of three-point volume and efficiency.
-
-## Shot Selection Comparison
-
-![Shot Selection by Zone](Visuals/shot_selection_by_zone.png)
-
-The chart highlights three distinctly different offensive profiles: Flagg's balanced interior and mid-range game, Harper's heavy concentration around the rim, and Knueppel's high-volume perimeter shooting.
-
-## Shot Charts
-
-### Cooper Flagg
-
-![Cooper Flagg Shot Chart](Visuals/cooper_flagg_shot_chart.png)
-
-### Dylan Harper
-
-![Dylan Harper Shot Chart](Visuals/dylan_harper_shot_chart.png)
-
-### Kon Knueppel
-
-![Kon Knueppel Shot Chart](Visuals/kon_knueppel_shot_chart.png)
-
-## Project Structure
-
-- `Data/` — Raw shot data and summary statistics
-- `Notebooks/` — Jupyter notebook containing the complete analysis
-- `Visuals/` — Shot charts and comparison visualizations
-- `README.md` — Project overview and key findings
+- required columns;
+- missing or invalid `SHOT_MADE_FLAG` values;
+- duplicate shot events when event identifiers are available;
+- consistent player labels; and
+- valid output calculations when a zone contains zero attempts.
 
 ## Limitations
 
-This analysis focuses exclusively on field goal attempts and does not account for free throws, turnovers, assists, or other aspects of offensive performance.
+- A single season may contain small samples, especially within individual zones.
+- Field-goal percentage does not fully capture shot difficulty or offensive value.
+- Location data alone does not explain defender distance, play type, lineup context, or late-clock situations.
+- Results depend on the completeness and availability of NBA API data.
 
-Some shot zones also contain relatively small sample sizes, so zone-level shooting percentages should be interpreted alongside attempt volume.
+## How to reproduce
 
-Points per shot in this project represents points generated from field goal attempts only and should not be interpreted as true shooting percentage or overall offensive efficiency.
+From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r nba-player-performance/requirements.txt
+python nba-player-performance/src/build_summary.py
+jupyter notebook nba-player-performance/Notebooks/rookie_shot_selection_analysis.ipynb
+```
+
+On Windows, activate the environment with `.venv\Scripts\activate`.
+
+## Next steps
+
+- Add a SQL version of the aggregation workflow.
+- Build an interactive dashboard with filters for player and shot zone.
+- Extend the analysis with play type, assisted-shot rate, or lineup context.
