@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
 st.set_page_config(page_title='NBA Rookie Shot Selection', layout='wide')
 st.title('NBA Rookie Shot Selection — Player Comparison')
 
-DATA = Path(__file__).resolve().parents[1] / 'Data' / 'rookie_shot_selection_summary.csv'
+DATA = Path(__file__).resolve().parent / 'Data' / 'rookie_shot_selection_summary.csv'
 
 if not DATA.exists():
     st.error('Summary CSV not found. Run nba-player-performance/src/build_summary.py first.')
