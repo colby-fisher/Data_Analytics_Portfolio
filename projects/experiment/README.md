@@ -12,3 +12,5 @@ How to run
 
 Notes
 - Sample data is synthetic and labeled. The power calculation is an approximation for demo purposes.
+
+**Live demo:** [Open the Streamlit A/B Test Explorer](https://dataanalyticsportfolio-phxkud2fonbd2vxwvscbtv.streamlit.app/)
