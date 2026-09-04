@@ -1,5 +1,7 @@
 # Churn & Retention — Telco Customer Churn
 
+**Live demo:** [Open the Streamlit dashboard](https://colby-fisher-data-analytics-portf-projectschurnapp-full-nffesp.streamlit.app/)
+
 Dataset: IBM Telco Customer Churn (public source)
 
 Problem statement: Identify customer segments with high churn risk and estimate revenue at risk to prioritize retention actions.
