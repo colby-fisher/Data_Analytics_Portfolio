@@ -1,0 +1,1 @@
+Monthly revenue line chart. Caption: Monthly revenue in sample data; anomalies are highlighted in the interactive dashboard. Accessibility note: markers indicate months; values shown in the table for screen readers.
