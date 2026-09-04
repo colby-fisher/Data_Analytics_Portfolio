@@ -76,16 +76,24 @@ except Exception:
 st.set_page_config(page_title='Churn & Retention — Full', layout='wide')
 st.title('Churn & Retention — Cohorts & Revenue at Risk')
 
-DB = Path(__file__).resolve().parents[1] / 'Data' / 'churn.db'
-# If the DB is not present in the deploy snapshot, attempt to run the ETL using the committed CSV.
-if not DB.exists():
-    st.info('Database not found in the deployed repository. Attempting to generate it from the committed CSV...')
+# Preferred DB path inside the project data
+committed_db = Path(__file__).resolve().parent / 'Data' / 'churn.db'
+# Runtime DB should be writable; if deployed FS is read-only, use /tmp
+runtime_db = committed_db
+# If committed DB missing or not readable/writable, fall back to /tmp
+import os
+if not committed_db.exists() or not os.access(str(committed_db), os.R_OK):
+    runtime_db = Path('/tmp') / 'churn.db'
+
+# If runtime DB doesn't exist, attempt ETL (write into runtime_db)
+if not runtime_db.exists():
+    st.info('Database not found in the deployed repository. Attempting to generate it (writes to /tmp on this host)...')
     with st.spinner('Running ETL to create churn.db — this may take a few seconds'):
         import subprocess
         etl_script = Path(__file__).resolve().parent / 'src' / 'etl.py'
         csv_path = Path(__file__).resolve().parent / 'Data' / 'Telco-Customer-Churn.csv'
         try:
-            res = subprocess.run([sys.executable, str(etl_script), '--input', str(csv_path), '--db', str(DB)], capture_output=True, text=True, check=False)
+            res = subprocess.run([sys.executable, str(etl_script), '--input', str(csv_path), '--db', str(runtime_db)], capture_output=True, text=True, check=False)
         except Exception as exc:
             st.error(f'Failed to start ETL: {exc}')
             st.stop()
@@ -98,7 +106,7 @@ if not DB.exists():
 
 # Load
 with st.spinner('Loading data...'):
-    df = load_customers(DB)
+    df = load_customers(runtime_db)
 
 # Top KPIs
 col1, col2, col3, col4 = st.columns(4)
