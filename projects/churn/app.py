@@ -2,6 +2,11 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 from pathlib import Path
+import sys
+# Ensure repository root is on sys.path for imports on Streamlit Cloud
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 DB = Path(__file__).resolve().parents[1] / 'Data' / 'churn.db'
 

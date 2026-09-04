@@ -2,6 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+import sys
+# Ensure repository root is on sys.path so project packages import correctly on Streamlit Cloud
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from projects.churn.src.analytics import load_customers, survival_by_tenure, retention_by_contract, revenue_at_risk_by_segment
 
 st.set_page_config(page_title='Churn & Retention — Full', layout='wide')

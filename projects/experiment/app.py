@@ -1,5 +1,11 @@
 import streamlit as st
 from pathlib import Path
+import sys
+# Ensure repository root is on sys.path for imports on Streamlit Cloud
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from projects.experiment.src.analytics import load_results, summary_by_variant, ttest_conversion, power_proportion
 import pandas as pd
 

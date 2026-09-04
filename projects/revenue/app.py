@@ -1,5 +1,11 @@
 import streamlit as st
 from pathlib import Path
+import sys
+# Ensure repository root is on sys.path for imports on Streamlit Cloud
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from projects.revenue.src.analytics import load_orders, monthly_kpis, top_products, region_breakdown, detect_monthly_anomalies
 import plotly.express as px
 

@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+import sys
+# Ensure repository root on sys.path for Streamlit Cloud
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 st.set_page_config(page_title='NBA Rookie Shot Selection', layout='wide')
 st.title('NBA Rookie Shot Selection — Player Comparison')
