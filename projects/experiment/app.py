@@ -6,16 +6,49 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from projects.experiment.src.analytics import load_results, summary_by_variant, ttest_conversion, power_proportion
+try:
+    from projects.experiment.src.analytics import load_results, summary_by_variant, ttest_conversion, power_proportion
+except Exception as exc:
+    print(f'Package import failed: {exc}')
+    import importlib.util
+    analytics_path = Path(__file__).resolve().parent / 'src' / 'analytics.py'
+    spec = importlib.util.spec_from_file_location('projects.experiment.src.analytics', analytics_path)
+    analytics = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(analytics)
+    load_results = analytics.load_results
+    summary_by_variant = analytics.summary_by_variant
+    ttest_conversion = analytics.ttest_conversion
+    power_proportion = analytics.power_proportion
 import pandas as pd
 
 st.set_page_config(page_title='Experiment Analysis', layout='wide')
 st.title('A/B Test Explorer')
 
-DB = Path(__file__).resolve().parents[1] / 'Data' / 'ab.db'
+project_dir = Path(__file__).resolve().parent
+committed_db = project_dir / 'Data' / 'ab.db'
+DB = committed_db if committed_db.exists() else Path('/tmp/ab.db')
 if not DB.exists():
-    st.error('Database not found. Run ETL: projects/experiment/src/etl.py')
-    st.stop()
+    st.info('Database not found in the deployed repository. Generating it from the committed sample CSV...')
+    with st.spinner('Running ETL to create ab.db...'):
+        import subprocess
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(project_dir / 'src' / 'etl.py'),
+                '--input',
+                str(project_dir / 'Data' / 'sample_ab_test.csv'),
+                '--db',
+                str(DB),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            error = (result.stderr or result.stdout or 'ETL failed with unknown error')[:1500]
+            st.error('ETL failed to create the database.')
+            st.code(error)
+            st.stop()
 
 df = load_results(DB)
 summary = summary_by_variant(df)
