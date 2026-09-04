@@ -24,10 +24,11 @@ st.markdown('---')
 # Monthly trend
 st.subheader('Monthly revenue trend')
 kpi = monthly_kpis(df)
-fig = px.line(kpi, x='month', y='revenue', markers=True, title='Monthly revenue')
+fig = px.line(kpi, x='month', y='revenue', markers=True, title='Monthly revenue', color_discrete_sequence=['#1170aa'])  # colorblind-friendly blue
 # annotate anomalies
 anoms = detect_monthly_anomalies(kpi)
-fig.add_scatter(x=anoms[anoms['anomaly']]['month'], y=anoms[anoms['anomaly']]['revenue'], mode='markers', marker=dict(color='red', size=10), name='Anomaly')
+fig.add_scatter(x=anoms[anoms['anomaly']]['month'], y=anoms[anoms['anomaly']]['revenue'], mode='markers', marker=dict(color='#d62728', size=10), name='Anomaly')
+fig.update_layout(legend_title_text='')
 st.plotly_chart(fig, use_container_width=True)
 
 st.subheader('Top products')

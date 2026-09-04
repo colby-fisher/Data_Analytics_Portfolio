@@ -56,7 +56,8 @@ st.markdown('---')
 st.subheader('Estimated monthly revenue at risk by Contract & InternetService')
 rev = revenue_at_risk_by_segment(df)
 heat = rev.pivot(index='Contract', columns='InternetService', values='est_monthly_revenue_lost').fillna(0)
-fig3 = px.imshow(heat, labels=dict(x='InternetService', y='Contract', color='Est monthly revenue lost'), text_auto='.2s', aspect='auto')
+fig3 = px.imshow(heat, labels=dict(x='InternetService', y='Contract', color='Est monthly revenue lost'), text_auto='.2s', aspect='auto', color_continuous_scale='Viridis')
+fig3.update_coloraxes(colorbar_title='Est monthly revenue lost')  # clearer label for accessibility
 fig3.update_layout(height=420)
 st.plotly_chart(fig3, use_container_width=True)
 

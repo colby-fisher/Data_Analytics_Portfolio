@@ -33,7 +33,8 @@ st.subheader('Attempts and FG% by zone')
 fig = px.bar(
     player_df.sort_values('attempts', ascending=False),
     x='SHOT_ZONE_BASIC', y='attempts', color='fg_pct',
-    color_continuous_scale='RdYlGn',
+    color_continuous_scale='Viridis',  # colorblind-friendly
+
     labels={'SHOT_ZONE_BASIC':'Zone', 'attempts':'Attempts', 'fg_pct':'FG%'}
 )
 fig.update_layout(xaxis_tickangle=-45, height=450)
@@ -43,7 +44,7 @@ st.subheader('Points per attempt by zone')
 fig2 = px.bar(
     player_df.sort_values('points_per_attempt', ascending=False),
     x='SHOT_ZONE_BASIC', y='points_per_attempt', color='points_per_attempt',
-    color_continuous_scale='Blues', labels={'points_per_attempt':'Points per attempt'}
+    color_continuous_scale='Cividis', labels={'points_per_attempt':'Points per attempt'}  # colorblind-friendly
 )
 fig2.update_layout(xaxis_tickangle=-45, height=380)
 st.plotly_chart(fig2, use_container_width=True)
