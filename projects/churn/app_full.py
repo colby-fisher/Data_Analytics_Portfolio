@@ -13,7 +13,7 @@ import os, subprocess, logging
 logging.basicConfig(level=logging.INFO)
 logging.info(f'ROOT set to {ROOT}')
 try:
-    churn_dir = Path(__file__).resolve().parents[1]
+    churn_dir = Path(__file__).resolve().parent
     ls_churn = subprocess.run(['ls', '-la', str(churn_dir)], capture_output=True, text=True)
     ls_root = subprocess.run(['ls', '-la', str(ROOT)], capture_output=True, text=True)
     churn_listing = ls_churn.stdout if hasattr(ls_churn, 'stdout') else ''
@@ -44,7 +44,7 @@ except Exception as e:
     print('Package import failed:', e)
     # Fallback: load module directly from file path to avoid package import issues in deploy
     import importlib.util
-    analytics_path = Path(__file__).resolve().parents[1] / 'src' / 'analytics.py'
+    analytics_path = Path(__file__).resolve().parent / 'src' / 'analytics.py'
     print('Loading analytics module from', analytics_path)
     spec = importlib.util.spec_from_file_location('projects.churn.src.analytics', str(analytics_path))
     analytics = importlib.util.module_from_spec(spec)
@@ -82,8 +82,8 @@ if not DB.exists():
     st.info('Database not found in the deployed repository. Attempting to generate it from the committed CSV...')
     with st.spinner('Running ETL to create churn.db — this may take a few seconds'):
         import subprocess
-        etl_script = Path(__file__).resolve().parents[1] / 'src' / 'etl.py'
-        csv_path = Path(__file__).resolve().parents[1] / 'Data' / 'Telco-Customer-Churn.csv'
+        etl_script = Path(__file__).resolve().parent / 'src' / 'etl.py'
+        csv_path = Path(__file__).resolve().parent / 'Data' / 'Telco-Customer-Churn.csv'
         try:
             res = subprocess.run([sys.executable, str(etl_script), '--input', str(csv_path), '--db', str(DB)], capture_output=True, text=True, check=False)
         except Exception as exc:
