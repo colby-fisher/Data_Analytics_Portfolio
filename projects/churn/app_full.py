@@ -1,0 +1,70 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from pathlib import Path
+from projects.churn.src.analytics import load_customers, survival_by_tenure, retention_by_contract, revenue_at_risk_by_segment
+
+st.set_page_config(page_title='Churn & Retention — Full', layout='wide')
+st.title('Churn & Retention — Cohorts & Revenue at Risk')
+
+DB = Path(__file__).resolve().parents[1] / 'Data' / 'churn.db'
+if not DB.exists():
+    st.error('Database not found. Run the ETL: projects/churn/src/etl.py')
+    st.stop()
+
+# Load
+with st.spinner('Loading data...'):
+    df = load_customers(DB)
+
+# Top KPIs
+col1, col2, col3, col4 = st.columns(4)
+total = len(df)
+churned = (df['Churn'] == 'Yes').sum()
+churn_pct = 100 * churned / total if total else 0
+avg_monthly = df['MonthlyCharges'].mean()
+estimated_monthly_risk = df.loc[df['Churn']=='Yes','MonthlyCharges'].sum()
+
+col1.metric('Customers', f'{total:,}')
+col2.metric('Churned', f'{churned:,}', delta=f'{churn_pct:.2f}%')
+col3.metric('Avg monthly charge', f'${avg_monthly:.2f}')
+col4.metric('Estimated monthly revenue lost', f'${estimated_monthly_risk:,.2f}')
+
+st.markdown('---')
+
+# Retention / survival by tenure
+st.subheader('Retention by tenure (survival curve)')
+sv = survival_by_tenure(df)
+fig = px.line(sv, x='tenure', y='retention_pct', markers=True, labels={'tenure':'Tenure (months)', 'retention_pct':'% retained'})
+fig.update_layout(height=420)
+st.plotly_chart(fig, use_container_width=True)
+
+st.caption('Retention here is percent of customers at each tenure month who have not churned. This is an aggregate survival view (no cohort start date in dataset).')
+
+# Retention by contract
+st.subheader('Retention by tenure, by contract')
+ret_contract = retention_by_contract(df)
+contracts = ret_contract['Contract'].unique().tolist()
+sel_contracts = st.multiselect('Contracts to show', options=contracts, default=contracts)
+plot_df = ret_contract[ret_contract['Contract'].isin(sel_contracts)]
+fig2 = px.line(plot_df, x='tenure', y='retention_pct', color='Contract', labels={'tenure':'Tenure (months)', 'retention_pct':'% retained'})
+fig2.update_layout(height=420)
+st.plotly_chart(fig2, use_container_width=True)
+
+st.markdown('---')
+
+# Revenue at risk heatmap
+st.subheader('Estimated monthly revenue at risk by Contract & InternetService')
+rev = revenue_at_risk_by_segment(df)
+heat = rev.pivot(index='Contract', columns='InternetService', values='est_monthly_revenue_lost').fillna(0)
+fig3 = px.imshow(heat, labels=dict(x='InternetService', y='Contract', color='Est monthly revenue lost'), text_auto='.2s', aspect='auto')
+fig3.update_layout(height=420)
+st.plotly_chart(fig3, use_container_width=True)
+
+st.markdown('---')
+
+st.subheader('Segment table: Estimated revenue at risk')
+st.dataframe(rev[['Contract','InternetService','customers','avg_monthly_charges','churned','est_monthly_revenue_lost']].reset_index(drop=True))
+
+st.markdown('**Notes & interpretation:**')
+st.write('- These figures are estimates based on current churned customers and average monthly charges in each segment.')
+st.write('- Use cohort tracking over time and customer lifetime value models before prioritizing retention spend.')

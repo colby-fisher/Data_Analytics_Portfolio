@@ -125,6 +125,16 @@ On Windows, activate the environment with `.venv\Scripts\activate`.
 
 ## Next steps
 
-- Add a SQL version of the aggregation workflow.
-- Build an interactive dashboard with filters for player and shot zone.
+- Add a SQL version of the aggregation workflow (see sql/aggregation.sql).
+- Build an interactive dashboard with filters for player and shot zone (see app.py for a Streamlit mini-app).
 - Extend the analysis with play type, assisted-shot rate, or lineup context.
+
+## Polished deliverables (added)
+
+- Recruiter 30s summary: RECRUITER_SUMMARY.md
+- Detailed technical case study: TECHNICAL_CASE_STUDY.md
+- Cleaned notebook (no outputs): Notebooks/rookie_shot_selection_analysis_clean.ipynb
+- Interactive mini-app (Streamlit): app.py — run with `streamlit run nba-player-performance/app.py`
+- SQL aggregation examples: sql/aggregation.sql
+
+These additions support both quick recruiter read-throughs and deeper technical review. See the top-level README for portfolio navigation.
