@@ -1,0 +1,6 @@
+order_id,order_date,customer_id,region,product,units,unit_price
+R001,2026-01-05,C001,North,Alpha,3,19.99
+R002,2026-01-07,C002,South,Beta,1,299.0
+R003,2026-01-09,C003,West,Alpha,2,19.99
+R004,2026-01-12,C004,East,Gamma,5,9.5
+R005,2026-01-15,C005,North,Beta,2,299.0

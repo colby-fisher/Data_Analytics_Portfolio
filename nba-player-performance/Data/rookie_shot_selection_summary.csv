@@ -1,4 +1,21 @@
-Player,FGA,FG%,3PT Rate %,Restricted Area Rate %,Mid-Range Rate %,Avg Shot Distance
-Cooper Flagg,1194,46.8,20.4,27.6,20.3,11.0
-Dylan Harper,656,50.5,27.1,45.6,9.9,10.2
-Kon Knueppel,1084,47.5,59.2,17.8,5.9,17.4
+PLAYER_NAME,SHOT_ZONE_BASIC,attempts,makes,points,fg_pct,shot_share,points_per_attempt
+Cooper Flagg,In The Paint (Non-RA),377,178,356,0.4721,0.3157,0.9443
+Cooper Flagg,Restricted Area,330,217,434,0.6576,0.2764,1.3152
+Cooper Flagg,Mid-Range,242,92,184,0.3802,0.2027,0.7603
+Cooper Flagg,Above the Break 3,213,64,192,0.3005,0.1784,0.9014
+Cooper Flagg,Left Corner 3,16,2,6,0.1250,0.0134,0.3750
+Cooper Flagg,Right Corner 3,16,6,18,0.3750,0.0134,1.1250
+Dylan Harper,Restricted Area,299,190,380,0.6355,0.4558,1.2709
+Dylan Harper,Above the Break 3,136,44,132,0.3235,0.2073,0.9706
+Dylan Harper,In The Paint (Non-RA),114,51,102,0.4474,0.1738,0.8947
+Dylan Harper,Mid-Range,65,29,58,0.4462,0.0991,0.8923
+Dylan Harper,Right Corner 3,27,12,36,0.4444,0.0412,1.3333
+Dylan Harper,Left Corner 3,14,5,15,0.3571,0.0213,1.0714
+Dylan Harper,Backcourt,1,0,0,0.0000,0.0015,0.0000
+Kon Knueppel,Above the Break 3,498,201,603,0.4036,0.4594,1.2108
+Kon Knueppel,Restricted Area,193,125,250,0.6477,0.1780,1.2953
+Kon Knueppel,In The Paint (Non-RA),185,93,186,0.5027,0.1707,1.0054
+Kon Knueppel,Left Corner 3,73,36,108,0.4932,0.0673,1.4795
+Kon Knueppel,Right Corner 3,70,36,108,0.5143,0.0646,1.5429
+Kon Knueppel,Mid-Range,64,24,48,0.3750,0.0590,0.7500
+Kon Knueppel,Backcourt,1,0,0,0.0000,0.0009,0.0000

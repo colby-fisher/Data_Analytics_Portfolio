@@ -1,5 +1,7 @@
 # Colby Fisher — Data Analytics Portfolio
 
+[![CI](https://github.com/colby-fisher/Data_Analytics_Portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/colby-fisher/Data_Analytics_Portfolio/actions/workflows/ci.yml)
+
 Data analytics projects demonstrating Python, SQL, data cleaning, exploratory analysis, visualization, and decision-focused communication.
 
 I am pursuing a B.S. in Data Analytics at Western Governors University and building toward analyst roles, with a long-term interest in basketball and sports analytics. Each project is designed to answer a practical question and communicate the result to both technical and nontechnical audiences.

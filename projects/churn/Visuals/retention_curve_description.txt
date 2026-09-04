@@ -1,0 +1,1 @@
+Retention curve image shows percent of customers retained by tenure month. Caption: Use to identify months with elevated churn for cohort interventions. Accessibility note: lines represent percent retained; x-axis is tenure in months.

@@ -1,0 +1,1 @@
+Shot selection by zone bar chart comparing players. Caption: Shows each player's attempts by NBA basic shot zones. Use to quickly compare offensive role and volume concentration. Note: small sample sizes in some zones may inflate percentages.
