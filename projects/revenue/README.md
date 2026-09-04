@@ -1,5 +1,7 @@
 Revenue & Operations Dashboard — Sample Retail Data
 
+**Live demo:** [Open the Streamlit dashboard](https://dataanalyticsportfolio-nj8lhsnwfkufxdamt8gqh5.streamlit.app/)
+
 Executive summary
 
 This demo dashboard summarizes transaction-level sales data, tracks revenue trends, highlights top products and regions, and surfaces monthly anomalies. It is designed to show practical BI skills: SQL aggregations, reproducible ETL, interactive Streamlit visualizations, and clear KPI definitions.

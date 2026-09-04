@@ -6,16 +6,45 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from projects.revenue.src.analytics import load_orders, monthly_kpis, top_products, region_breakdown, detect_monthly_anomalies
+try:
+    from projects.revenue.src.analytics import load_orders, monthly_kpis, top_products, region_breakdown, detect_monthly_anomalies
+except Exception as exc:
+    print(f'Package import failed: {exc}')
+    import importlib.util
+    analytics_path = Path(__file__).resolve().parent / 'src' / 'analytics.py'
+    spec = importlib.util.spec_from_file_location('projects.revenue.src.analytics', analytics_path)
+    analytics = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(analytics)
+    load_orders = analytics.load_orders
+    monthly_kpis = analytics.monthly_kpis
+    top_products = analytics.top_products
+    region_breakdown = analytics.region_breakdown
+    detect_monthly_anomalies = analytics.detect_monthly_anomalies
 import plotly.express as px
 
 st.set_page_config(page_title='Revenue Dashboard', layout='wide')
 st.title('Revenue & Operations Dashboard')
 
-DB = Path(__file__).resolve().parents[1] / 'Data' / 'revenue.db'
+project_dir = Path(__file__).resolve().parent
+committed_db = project_dir / 'Data' / 'revenue.db'
+DB = committed_db if committed_db.exists() else Path('/tmp/revenue.db')
 if not DB.exists():
-    st.error('Database not found. Run ETL: projects/revenue/src/etl.py')
-    st.stop()
+    st.info('Database not found in the deployed repository. Generating it from the committed sample CSV...')
+    with st.spinner('Running ETL to create revenue.db...'):
+        import subprocess
+        etl_script = project_dir / 'src' / 'etl.py'
+        csv_path = project_dir / 'Data' / 'sample_revenue.csv'
+        result = subprocess.run(
+            [sys.executable, str(etl_script), '--input', str(csv_path), '--db', str(DB)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            error = (result.stderr or result.stdout or 'ETL failed with unknown error')[:1500]
+            st.error('ETL failed to create the database.')
+            st.code(error)
+            st.stop()
 
 with st.spinner('Loading data...'):
     df = load_orders(DB)
