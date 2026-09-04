@@ -8,15 +8,79 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Debugging: print directory listings and write a small debug file to /tmp so runtime logs show deployed files
+import os, subprocess, logging
+logging.basicConfig(level=logging.INFO)
+logging.info(f'ROOT set to {ROOT}')
+try:
+    churn_dir = Path(__file__).resolve().parents[1]
+    ls_churn = subprocess.run(['ls', '-la', str(churn_dir)], capture_output=True, text=True)
+    ls_root = subprocess.run(['ls', '-la', str(ROOT)], capture_output=True, text=True)
+    churn_listing = ls_churn.stdout if hasattr(ls_churn, 'stdout') else ''
+    root_listing = ls_root.stdout if hasattr(ls_root, 'stdout') else ''
+    db_check = churn_dir / 'Data' / 'churn.db'
+    print('--- CHURN DIR LISTING ---')
+    print(churn_listing)
+    print('--- REPO ROOT LISTING ---')
+    print(root_listing)
+    print(f'Checking DB exists at {db_check}:', db_check.exists())
+    # write a debug file
+    try:
+        with open('/tmp/churn_deploy_debug.txt', 'w') as fh:
+            fh.write('CHURN DEPLOY DEBUG\n')
+            fh.write('CHURN DIR:\n')
+            fh.write(churn_listing or '')
+            fh.write('\nREPO ROOT:\n')
+            fh.write(root_listing or '')
+            fh.write(f'\nDB exists: {db_check.exists()}\n')
+    except Exception as e:
+        print('Failed to write /tmp debug file:', e)
+except Exception as e:
+    print('Failed to list directories for debug:', e)
+
 from projects.churn.src.analytics import load_customers, survival_by_tenure, retention_by_contract, revenue_at_risk_by_segment
+
+# Surface the debug info in the Streamlit UI so deploy logs aren't required
+try:
+    import streamlit as _st
+    with _st.expander('Deployment debug info (files & DB check)'):
+        _st.markdown('**CHURN directory listing**')
+        _st.code(churn_listing or 'No listing available')
+        _st.markdown('**Repository root listing**')
+        _st.code(root_listing or 'No listing available')
+        _st.markdown('**DB exists?**')
+        _st.write(db_check.exists())
+        try:
+            with open('/tmp/churn_deploy_debug.txt') as _fh:
+                _st.markdown('**/tmp/churn_deploy_debug.txt**')
+                _st.code(_fh.read())
+        except Exception:
+            _st.write('No /tmp debug file')
+except Exception:
+    pass
 
 st.set_page_config(page_title='Churn & Retention — Full', layout='wide')
 st.title('Churn & Retention — Cohorts & Revenue at Risk')
 
 DB = Path(__file__).resolve().parents[1] / 'Data' / 'churn.db'
+# If the DB is not present in the deploy snapshot, attempt to run the ETL using the committed CSV.
 if not DB.exists():
-    st.error('Database not found. Run the ETL: projects/churn/src/etl.py')
-    st.stop()
+    st.info('Database not found in the deployed repository. Attempting to generate it from the committed CSV...')
+    with st.spinner('Running ETL to create churn.db — this may take a few seconds'):
+        import subprocess
+        etl_script = Path(__file__).resolve().parents[1] / 'src' / 'etl.py'
+        csv_path = Path(__file__).resolve().parents[1] / 'Data' / 'Telco-Customer-Churn.csv'
+        try:
+            res = subprocess.run([sys.executable, str(etl_script), '--input', str(csv_path), '--db', str(DB)], capture_output=True, text=True, check=False)
+        except Exception as exc:
+            st.error(f'Failed to start ETL: {exc}')
+            st.stop()
+        if res.returncode != 0:
+            # show a truncated stderr to assist debugging
+            err = (res.stderr or res.stdout or 'ETL failed with unknown error')[:1500]
+            st.error('ETL failed to create the database. See logs for details.')
+            st.code(err)
+            st.stop()
 
 # Load
 with st.spinner('Loading data...'):
