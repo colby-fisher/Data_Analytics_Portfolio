@@ -38,7 +38,21 @@ try:
 except Exception as e:
     print('Failed to list directories for debug:', e)
 
-from projects.churn.src.analytics import load_customers, survival_by_tenure, retention_by_contract, revenue_at_risk_by_segment
+try:
+    from projects.churn.src.analytics import load_customers, survival_by_tenure, retention_by_contract, revenue_at_risk_by_segment
+except Exception as e:
+    print('Package import failed:', e)
+    # Fallback: load module directly from file path to avoid package import issues in deploy
+    import importlib.util
+    analytics_path = Path(__file__).resolve().parents[1] / 'src' / 'analytics.py'
+    print('Loading analytics module from', analytics_path)
+    spec = importlib.util.spec_from_file_location('projects.churn.src.analytics', str(analytics_path))
+    analytics = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(analytics)
+    load_customers = analytics.load_customers
+    survival_by_tenure = analytics.survival_by_tenure
+    retention_by_contract = analytics.retention_by_contract
+    revenue_at_risk_by_segment = analytics.revenue_at_risk_by_segment
 
 # Surface the debug info in the Streamlit UI so deploy logs aren't required
 try:
