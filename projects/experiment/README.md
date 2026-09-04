@@ -12,5 +12,3 @@ How to run
 
 Notes
 - Sample data is synthetic and labeled. The power calculation is an approximation for demo purposes.
-
-**Live demo:** Add the Streamlit URL here after deployment.
