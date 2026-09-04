@@ -45,6 +45,12 @@ Recommended interpretation checklist
 - Consider A/B testing proposed retention offers in the highest-estimated-risk segments before full rollout.
 - Translate estimated monthly revenue lost into customer lifetime value (CLV) before budgeting retention spend.
 
+Visuals:
+
+![Retention by tenure](Visuals/retention_curve.png)
+
+_Caption: Retention by tenure (percent retained) — helpful to identify months with elevated dropout._
+
 Notes:
 - No credentials are required. The dataset is a small public sample appropriate for portfolio demonstration.
 - Outputs are deterministic; where randomness is used, seeds are documented.

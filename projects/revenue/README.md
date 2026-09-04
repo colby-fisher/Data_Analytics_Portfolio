@@ -18,3 +18,9 @@ What's included
 - sql/queries.sql — equivalent SQL queries
 - app.py — Streamlit dashboard
 - RECRUITER_SUMMARY.md, TECHNICAL_CASE_STUDY.md
+
+Visuals:
+
+![Monthly revenue trend](Visuals/monthly_revenue.png)
+
+_Caption: Monthly revenue (sample) — anomalies are highlighted in the interactive app._
