@@ -1,140 +1,209 @@
-# NBA Rookie Shot Selection Analysis
+# AI Basketball Scouting Assistant
 
-## Executive summary
+An interactive, evidence-first scouting product that converts NBA shot-level data into player profiles, visual comparisons, and grounded AI interpretations. Built for the Handshake AI Showcase and as a data analytics portfolio case study.
 
-This project compares the 2025–26 shot profiles of Cooper Flagg, Dylan Harper, and Kon Knueppel. The analysis converts play-by-play shot records into a consistent set of location and efficiency metrics, then uses those metrics to describe each player's offensive tendencies.
+> **Important data context:** The repository contains a static 2025–26 portfolio dataset. The application does not claim to provide live NBA statistics. Every number in the interface and scouting inputs is recalculated from the committed shot rows.
 
-The project is framed like an analyst assignment: begin with a decision-oriented question, clean and validate the data, calculate comparable KPIs, visualize the results, and translate the evidence into recommendations.
+## Project Overview
 
-## Business question
+This project analyzes 2,934 field-goal attempts for Cooper Flagg, Dylan Harper, and Kon Knueppel. A Streamlit application lets a user inspect one player's shot profile or compare two players, then generate a structured scouting interpretation. The interpretation is powered by an optional LLM when configured and a deterministic rules engine otherwise.
 
-If a coaching, scouting, or player-development staff were evaluating these rookies, how could shot-location data help identify:
+The product separates two responsibilities:
 
-- where each player creates most of his offense;
-- which areas produce the best and worst results;
-- how shot selection differs across the three players; and
-- which development priorities deserve additional film or contextual analysis?
+- **Calculated data:** validated pandas transformations produce attempts, makes, FG%, shot rates, distance, points per attempt, and zone breakdowns.
+- **Interpretation:** an LLM or deterministic fallback explains those calculated results and their limitations.
 
-## Why this matters beyond basketball
+## Problem
 
-The same workflow is used in general analyst roles: standardize inconsistent data, define meaningful performance indicators, compare entities fairly, find patterns, and present recommendations without overstating what the data proves.
+Shot data is detailed but difficult to scan quickly. A scout, coach, or analyst needs a concise answer to three questions: where does a player shoot, how efficiently does he convert, and what should be investigated next? A generic chatbot is unsafe for this task because it can recall stale facts or invent plausible-looking statistics.
 
-## Tools and skills
+## Who This Helps
 
-- Python and Jupyter Notebook
-- `nba_api` for data collection
-- pandas and NumPy for cleaning and transformation
-- Matplotlib and Seaborn for visualization
-- Data validation, KPI development, exploratory analysis, and written recommendations
+- Scouting and player-development staff prioritizing film review
+- Basketball analysts comparing shot-selection profiles
+- Recruiters evaluating applied analytics, product thinking, and responsible AI implementation
+- Students learning how deterministic analysis and generative AI can work together
 
-## Repository structure
+## Solution
+
+The assistant validates local shot records, computes a structured statistical profile, presents interactive evidence, and passes the same structure to a bounded interpretation layer. The user can:
+
+- select any player in the dataset;
+- inspect KPI cards, shot-zone distribution, zone efficiency, and shot locations;
+- retain access to the original notebook-generated shot charts;
+- generate a six-section individual scouting report;
+- compare two players through a common metric table and grouped zone chart; and
+- generate a structured comparison without requiring an API key.
+
+## Key Features
+
+- Centralized CSV discovery, schema validation, numeric coercion, and duplicate handling
+- Reusable player and zone metric functions
+- Individual player and two-player comparison modes
+- Interactive Plotly visuals plus preserved Matplotlib notebook assets
+- Grounded prompt templates kept outside UI code
+- Swappable text-generation provider interface
+- Environment-based credentials with no committed secrets
+- Deterministic fallback for offline demos and provider failures
+- Focused pytest coverage for validation, calculations, comparisons, selections, and scouting fallback
+
+## Data
+
+The source files in `Data/` contain one row per field-goal attempt and include NBA event identifiers, shot result, type, basic zone, distance, coordinates, and game date. The three player files contain 1,194, 656, and 1,084 attempts respectively. See [`docs/data_dictionary.md`](docs/data_dictionary.md) for field definitions.
+
+The data was originally retrieved with `nba_api`, as documented in the notebook. The running application intentionally uses the committed CSVs so a recruiter can reproduce the analysis without relying on a rate-limited external endpoint.
+
+## Methodology
+
+1. Discover player shot files using the `*_shots.csv` naming convention.
+2. Validate required columns and reject missing or malformed analytical values.
+3. Preserve `GAME_ID` as text and remove repeated player/game/event keys.
+4. Calculate each player's totals and shot-zone profile from the validated rows.
+5. Calculate Player B minus Player A differences for comparisons.
+6. Render the evidence before offering an interpretation.
+7. Send only the structured calculated snapshot—not raw general knowledge—to the optional LLM.
+
+Metric definitions and interpretation standards are documented in [`docs/methodology.md`](docs/methodology.md).
+
+## Architecture
 
 ```text
 nba-player-performance/
-├── Data/
-│   ├── cooper_flagg_shots.csv
-│   ├── dylan_harper_shots.csv
-│   ├── kon_knueppel_shots.csv
-│   └── rookie_shot_selection_summary.csv
-├── Notebooks/
-│   └── rookie_shot_selection_analysis.ipynb
-├── Visuals/
-│   └── generated charts
-├── docs/
-│   ├── data_dictionary.md
-│   └── methodology.md
+├── app.py                      # Streamlit presentation and interaction
+├── Data/                       # committed shot-level source data
+├── Notebooks/                  # original exploratory and clean analysis
+├── Visuals/                    # original exported analysis visuals
+├── docs/                       # data dictionary and methodology
 ├── src/
-│   └── build_summary.py
-├── requirements.txt
-└── README.md
+│   ├── data_loader.py          # discovery, validation, cleaning, selection
+│   ├── analytics.py            # deterministic metrics and comparisons
+│   ├── prompts.py              # grounded prompt templates
+│   ├── scouting.py             # LLM adapter and deterministic fallback
+│   └── build_summary.py        # optional reproducible zone export
+├── tests/                      # focused unit and integration tests
+├── .env.example
+└── requirements.txt
 ```
 
-## Analysis workflow
+The modules are deliberately small and direct: a junior analyst can follow data from CSV, through validation and calculation, to visualization and interpretation without a framework-heavy abstraction layer.
 
-1. Retrieve shot records for all three rookies with the same season and season-type filters.
-2. Standardize columns and data types before combining player files.
-3. Check missing values, duplicate events, invalid shot values, and coordinate ranges.
-4. Assign shots to consistent analytical zones.
-5. Calculate attempts, makes, field-goal percentage, shot share, and points per attempt.
-6. Compare player profiles visually and summarize decision-relevant takeaways.
+## AI Implementation
 
-## Key findings
+`src/scouting.py` exposes a minimal `TextGenerator` protocol. The included OpenAI adapter uses the Responses API, while application code depends only on the small `generate_*_report` functions. This makes a future provider swap localized.
 
-- **Shot distribution:** Kon Knueppel had the most perimeter-oriented profile, with 59.2% of his attempts coming from three-point range and an average shot distance of 17.4 feet.
-- **Overall efficiency:** Dylan Harper recorded the highest field-goal percentage at 50.5%, despite having the smallest sample of the three players at 656 attempts.
-- **Profile difference:** Knueppel's three-point rate was 38.8 percentage points higher than Cooper Flagg's, while Harper's restricted-area rate was 18.0 percentage points higher than Flagg's.
-- **Development opportunity:** Flagg took 20.3% of his shots from mid-range—the highest rate in the group—while posting the lowest overall field-goal percentage at 46.8%. This makes his mid-range shot selection a useful area for additional film and efficiency analysis.
+If `OPENAI_API_KEY` is present, the app requests an LLM interpretation. `OPENAI_MODEL` optionally selects the model. If the key is missing or the request fails, a deterministic engine creates the same report sections from explicit thresholds and calculated values.
 
-## Visual analysis
+### How AI Is Grounded in Calculated Data
 
-### Shot selection by zone
+The prompt receives a JSON-serializable dictionary created by `analytics.py`. It does not receive an invitation to search memory for player statistics. Individual inputs contain totals, rates, average distance, points per attempt, and a complete zone table. Comparison inputs contain both profiles, signed differences, and zone-share differences.
 
-![Shot selection comparison by zone](Visuals/shot_selection_by_zone.png)
+### Safeguards Against Fabricated Statistics
 
-This comparison highlights the clearest differences in offensive profile: Knueppel's perimeter-heavy shot distribution, Harper's emphasis on the restricted area, and Flagg's larger mid-range share.
+- The model is explicitly told to use only `CALCULATED_DATA`.
+- It is forbidden from adding, estimating, recalling, or inventing a statistic.
+- Every response number must appear in the supplied structure.
+- Prompts require evidence to be distinguished from interpretation.
+- Unsupported claims about defense, athleticism, passing, injuries, role, and film are prohibited.
+- The UI visibly separates calculated data from the interpretation layer.
+- The offline fallback uses no generative model.
+- Tests verify that grounding instructions and calculated data are included in prompts.
 
-### Cooper Flagg shot chart
+These controls reduce hallucination risk; they do not make model output infallible. Production use should add output-schema validation and human review.
 
-![Cooper Flagg shot chart](Visuals/cooper_flagg_shot_chart.png)
+## Key Findings
 
-### Dylan Harper shot chart
+The following values are calculated from the committed shot rows:
 
-![Dylan Harper shot chart](Visuals/dylan_harper_shot_chart.png)
+- Cooper Flagg recorded 1,194 FGA, 46.8% FG, a 20.4% three-point attempt rate, a 20.3% mid-range attempt rate, and 11.0-foot average shot distance.
+- Dylan Harper recorded 656 FGA and the highest FG% in this three-player dataset at 50.5%; 45.6% of his attempts came from the restricted area.
+- Kon Knueppel recorded 1,084 FGA, a 59.2% three-point attempt rate, 17.4-foot average shot distance, and 1.202 points per field-goal attempt.
+- The clearest style contrast is location: Harper's recorded profile is more restricted-area-oriented, while Knueppel's is substantially more perimeter-oriented. Flagg has the largest mid-range share of the three.
 
-### Kon Knueppel shot chart
+These are descriptive shot-profile findings, not complete rankings. Free throws, turnovers, passing, defense, lineup context, defender distance, and play type are outside the dataset.
 
-![Kon Knueppel shot chart](Visuals/kon_knueppel_shot_chart.png)
+## Technologies Used
 
-## Recommendations
+Python, pandas, NumPy, Streamlit, Plotly, Matplotlib, Seaborn, `nba_api`, OpenAI Responses API, pytest, SQL, and Jupyter Notebook.
 
-- Use both volume and efficiency when evaluating a shot zone; high percentage on a very small sample should not drive a decision by itself.
-- Review film and lineup context for the largest differences. Shot data describes outcomes and locations, but not defensive pressure, play type, or teammate spacing.
-- Track the same metrics over multiple seasons or rolling intervals to determine whether early patterns remain stable.
-- Pair this work with possession, play-type, and lineup data before making personnel conclusions.
-
-## Data quality checks
-
-The reproducible summary script checks for:
-
-- required columns;
-- missing or invalid `SHOT_MADE_FLAG` values;
-- duplicate shot events when event identifiers are available;
-- consistent player labels; and
-- valid output calculations when a zone contains zero attempts.
-
-## Limitations
-
-- A single season may contain small samples, especially within individual zones.
-- Field-goal percentage does not fully capture shot difficulty or offensive value.
-- Location data alone does not explain defender distance, play type, lineup context, or late-clock situations.
-- Results depend on the completeness and availability of NBA API data.
-
-## How to reproduce
+## How to Run Locally
 
 From the repository root:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r nba-player-performance/requirements.txt
-python nba-player-performance/src/build_summary.py
-jupyter notebook nba-player-performance/Notebooks/rookie_shot_selection_analysis.ipynb
+python -m pip install -r nba-player-performance/requirements.txt
+streamlit run nba-player-performance/app.py
 ```
 
-On Windows, activate the environment with `.venv\Scripts\activate`.
+The app works immediately in deterministic mode. To enable LLM interpretation, copy the example configuration and set your own secret locally:
 
-## Next steps
+```bash
+cp nba-player-performance/.env.example nba-player-performance/.env
+export OPENAI_API_KEY="your-key"
+export OPENAI_MODEL="gpt-4.1-mini"
+streamlit run nba-player-performance/app.py
+```
 
-- Add a SQL version of the aggregation workflow (see sql/aggregation.sql).
-- Build an interactive dashboard with filters for player and shot zone (see app.py for a Streamlit mini-app).
-- Extend the analysis with play type, assisted-shot rate, or lineup context.
+The application reads environment variables; it does not load or commit `.env`. Never add a real key to source control.
 
-## Polished deliverables (added)
+Run tests from the repository root:
 
-- Recruiter 30s summary: RECRUITER_SUMMARY.md
-- Detailed technical case study: TECHNICAL_CASE_STUDY.md
-- Cleaned notebook (no outputs): Notebooks/rookie_shot_selection_analysis_clean.ipynb
-- Interactive mini-app (Streamlit): app.py — run with `streamlit run nba-player-performance/app.py`
-- SQL aggregation examples: sql/aggregation.sql
+```bash
+python -m pytest -q nba-player-performance/tests
+```
 
-These additions support both quick recruiter read-throughs and deeper technical review. See the top-level README for portfolio navigation.
+Regenerate the optional zone summary with:
+
+```bash
+python nba-player-performance/src/build_summary.py
+```
+
+## Deployment
+
+For Streamlit Community Cloud:
+
+1. Choose this GitHub repository and set the entry point to `nba-player-performance/app.py`.
+2. The project-local `requirements.txt` includes every application and test dependency.
+3. Deploy without a secret for deterministic mode, or add `OPENAI_API_KEY` and optional `OPENAI_MODEL` through Streamlit's encrypted secrets settings.
+4. Do not commit `.env` or `.streamlit/secrets.toml`; `.env` is already ignored by the repository.
+
+All runtime file paths are derived from `app.py`, so the app does not depend on a developer's working directory. The committed data and visuals remove runtime network dependencies except optional LLM generation.
+
+## Handshake AI Showcase
+
+**Problem being solved:** scouting data is too granular for quick evaluation, while ungrounded chatbots can produce convincing but unreliable sports claims.
+
+**Intended users:** basketball scouts, player-development staff, analysts, and decision-makers who need a fast statistical orientation before deeper film review.
+
+**How AI is used:** AI translates a calculated statistical object into a consistent scouting narrative and comparison. It does not calculate or retrieve the statistics.
+
+**Why AI adds value:** deterministic charts answer “what happened”; the interpretation layer organizes that evidence into strengths, development questions, style differences, and limitations that are faster to consume.
+
+**How it remains grounded:** the model receives only application-calculated data and strict evidence rules. The product visibly labels the source data and generated interpretation, and remains fully usable without a model.
+
+**My contribution:** I designed the product workflow; modularized ingestion, validation, analytics, comparison, prompts, and provider logic; built the Streamlit experience; preserved and integrated the original analysis assets; added tests and failure handling; and documented responsible AI boundaries and deployment.
+
+**Expected real-world value:** the assistant can shorten the first pass of shot-profile review, make comparisons consistent, and give staff targeted questions for film study while keeping numerical evidence auditable.
+
+## Limitations
+
+- The dataset is a static snapshot and is not refreshed in the application.
+- Only field-goal attempts are included; points per attempt is not true shooting percentage.
+- Shot location does not measure difficulty, defensive pressure, play design, or decision quality.
+- Zone percentages can be unstable in small samples.
+- Generated interpretation still requires human review.
+- The current LLM response is free-form Markdown rather than a validated structured schema.
+
+## Future Improvements
+
+- Add retrieval timestamps and automated, versioned data refreshes.
+- Add game-level and rolling-window filters.
+- Incorporate play type, defender distance, assisted rate, lineup, and possession context.
+- Validate LLM output against an allowed-number ledger before display.
+- Add exportable PDF reports and saved scouting sessions.
+- Expand accessibility and mobile interface testing.
+
+## What I Personally Built
+
+I built the end-to-end analytical product: data-quality controls, reproducible metric functions, comparison logic, interactive Streamlit interface, optional LLM integration, prompt safeguards, deterministic fallback, automated tests, deployment configuration, and recruiter-facing case-study documentation. The original notebooks and visuals remain in the project to show the exploratory path that informed the production application.
